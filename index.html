@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diet Analysis</title>
+
+  <style>
+    /* --------------------------------------------------------
+       CSS — controls how everything looks.
+       Think of this like the color/font settings in tkinter,
+       but much more powerful.
+    -------------------------------------------------------- */
+
+    /* Import a nice font from Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+
+    /* Reset default browser spacing */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page background and font */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F7F6F2;
+      color: #1A1A1A;
+      padding: 28px 28px 40px;
+      /* Space at top for Mac's traffic-light buttons (close/minimise/maximise) */
+      padding-top: 44px;
+    }
+
+    /* Page title */
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    /* Subtitle under the title */
+    .subtitle {
+      font-size: 13px;
+      color: #888880;
+      margin-bottom: 22px;
+    }
+
+    /* ---- CATEGORY CARDS ---- */
+    .card {
+      background: #FFFFFF;
+      border: 0.5px solid #E0DED8;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+
+    /* Small multiplier label at the top of each card */
+    .card-badge {
+      font-size: 11px;
+      color: #AAAAAA;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Category title inside the card */
+    .card-title {
+      font-family: 'Lora', serif;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    /* Examples text */
+    .card-examples {
+      font-size: 12px;
+      color: #777770;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    /* Thin horizontal rule between examples and counter */
+    .divider {
+      border: none;
+      border-top: 0.5px solid #EBEBEB;
+      margin-bottom: 12px;
+    }
+
+    /* Row containing the counter controls */
+    .counter-row {
+      display: flex;           /* lay items out in a horizontal line */
+      align-items: center;     /* vertically center everything */
+      gap: 10px;               /* space between items */
+    }
+
+    .counter-row-label {
+      font-size: 13px;
+      color: #666660;
+      flex: 1;                 /* push the counter to the right */
+    }
+
+    /* +/- buttons */
+    .btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 0.5px solid #D0CEC8;
+      background: #FFFFFF;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1A1A1A;
+      transition: background 0.15s;  /* smooth hover colour change */
+      user-select: none;             /* prevent text selection on click */
+    }
+
+    .btn:hover { background: #F3F2EE; }
+    .btn:active { background: #E8E6E0; }
+
+    /* The number between + and - */
+    .counter-value {
+      font-family: 'Lora', serif;
+      font-size: 20px;
+      font-weight: 600;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    /* Points breakdown on the right (e.g. "2 × 1 = 2 pts") */
+    .counter-pts {
+      font-size: 12px;
+      color: #AAAAAA;
+      min-width: 90px;
+      text-align: right;
+    }
+
+    /* ---- RESULTS PANEL ---- */
+    .results {
+      background: #F0EFE9;
+      border: 0.5px solid #D8D6D0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 6px;
+    }
+
+    /* Row with "Total score" label and big number */
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: #666660;
+    }
+
+    .score-value {
+      font-family: 'Lora', serif;
+      font-size: 36px;
+      font-weight: 600;
+    }
+
+    /* Progress bar track (the grey background) */
+    .bar-track {
+      height: 8px;
+      border-radius: 4px;
+      background: #E0DED8;
+      margin-bottom: 5px;
+      overflow: hidden;
+    }
+
+    /* Progress bar fill (the coloured part) */
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      /* Smoothly animate width and colour changes */
+      transition: width 0.35s ease, background-color 0.35s ease;
+      background-color: #639922;
+    }
+
+    /* Low / Moderate / High labels below the bar */
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #AAAAAA;
+      margin-bottom: 12px;
+    }
+
+    /* Risk level badge (e.g. "Low risk") */
+    .risk-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      /* Colours are set by JavaScript below */
+    }
+
+    /* Advice text */
+    .advice {
+      font-size: 13px;
+      color: #555550;
+      line-height: 1.6;
+    }
+
+    /* Footer note */
+    .footer {
+      font-size: 11px;
+      color: #AAAAAA;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- PAGE TITLE -->
+  <h1>Diet Analysis</h1>
+  <p class="subtitle">Tooth decay risk calculator &nbsp;·&nbsp; count times per day</p>
+
+  <!-- -------------------------------------------------------
+       CATEGORY CARDS
+       Each card has a + / - counter and a breakdown label.
+       The data-key attribute links the card to JavaScript.
+  ------------------------------------------------------- -->
+
+  <!-- Card 1: Liquid -->
+  <div class="card">
+    <div class="card-badge">×1 pt each</div>
+    <div class="card-title">Liquid foods &amp; drinks</div>
+    <div class="card-examples">
+      Soft drinks, fruit juice, cocoa, flavoured yogurt, ice cream, pudding, popsicles
+    </div>
+    <hr class="divider">
+    <div class="counter-row">
+      <span class="counter-row-label">Times per day</span>
+      <button class="btn" onclick="adjust('liquid', -1)">−</button>
+      <span class="counter-value" id="liquid-val">0</span>
+      <button class="btn" onclick="adjust('liquid', 1)">+</button>
+      <span class="counter-pts" id="liquid-pts">0 × 1 = 0 pts</span>
+    </div>
+  </div>
+
+  <!-- Card 2: Solid & sticky -->
+  <div class="card">
+    <div class="card-badge">×2 pts each</div>
+    <div class="card-title">Solid &amp; sticky foods</div>
+    <div class="card-examples">
+      Cake, donuts, cookies, chocolate, caramel, dried fruit, jam, jelly, bananas
+    </div>
+    <hr class="divider">
+    <div class="counter-row">
+      <span class="counter-row-label">Times per day</span>
+      <button class="btn" onclick="adjust('solid', -1)">−</button>
+      <span class="counter-value" id="solid-val">0</span>
+      <button class="btn" onclick="adjust('solid', 1)">+</button>
+      <span class="counter-pts" id="solid-pts">0 × 2 = 0 pts</span>
+    </div>
+  </div>
+
+  <!-- Card 3: Slowly dissolving -->
+  <div class="card">
+    <div class="card-badge">×3 pts each</div>
+    <div class="card-title">Slowly dissolving foods</div>
+    <div class="card-examples">
+      Hard candies, breath mints, antacid tablets, cough drops
+    </div>
+    <hr class="divider">
+    <div class="counter-row">
+      <span class="counter-row-label">Times per day</span>
+      <button class="btn" onclick="adjust('slow', -1)">−</button>
+      <span class="counter-value" id="slow-val">0</span>
+      <button class="btn" onclick="adjust('slow', 1)">+</button>
+      <span class="counter-pts" id="slow-pts">0 × 3 = 0 pts</span>
+    </div>
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="results">
+    <div class="score-row">
+      <span class="score-label">Total score</span>
+      <span class="score-value" id="total-score">0</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-fill"></div>
+    </div>
+    <div class="bar-labels">
+      <span>0–1 low</span>
+      <span>2–7 moderate</span>
+      <span>8+ high</span>
+    </div>
+    <div class="risk-badge" id="risk-badge" style="background:#EAF3DE; color:#3B6D11;">
+      Low risk
+    </div>
+    <div class="advice" id="advice">
+      Great job! Your diet looks good for your teeth.
+    </div>
+  </div>
+
+
+
+
+  <!-- -------------------------------------------------------
+       JAVASCRIPT
+       This is the logic layer — equivalent to your Python
+       functions. It runs in the browser engine inside Electron.
+  ------------------------------------------------------- -->
+  <script>
+
+    // ---- DATA ----
+    // An object holds the current count and multiplier for each category.
+    // Objects in JavaScript work like dictionaries in Python.
+    const categories = {
+      liquid: { count: 0, multiplier: 1 },
+      solid:  { count: 0, multiplier: 2 },
+      slow:   { count: 0, multiplier: 3 },
+    }
+
+    // ---- ADJUST FUNCTION ----
+    // Called when + or - is clicked.
+    // "key" is which category (e.g. 'liquid'), "delta" is +1 or -1.
+    function adjust(key, delta) {
+      // Change the count, but don't let it go below 0
+      categories[key].count = Math.max(0, categories[key].count + delta)
+
+      // After changing the count, update everything on screen
+      update()
+    }
+
+    // ---- UPDATE FUNCTION ----
+    // Recalculates the score and updates all displayed values.
+    // This runs every time a button is clicked.
+    function update() {
+
+      // Calculate points for each category and the total
+      let total = 0
+      for (const key in categories) {
+        const cat = categories[key]
+        const pts = cat.count * cat.multiplier
+        total += pts
+
+        // Update the count display (the number between + and -)
+        // document.getElementById() finds an HTML element by its id=""
+        document.getElementById(key + '-val').textContent = cat.count
+
+        // Update the breakdown label (e.g. "2 × 1 = 2 pts")
+        document.getElementById(key + '-pts').textContent =
+          `${cat.count} × ${cat.multiplier} = ${pts} pt${pts !== 1 ? 's' : ''}`
+      }
+
+      // Update the big total number
+      document.getElementById('total-score').textContent = total
+
+      // ---- RISK LEVEL LOGIC ----
+      // Same if/else logic as your original Python script
+      let barColor, barPct, badgeBg, badgeFg, riskText, adviceText
+
+      if (total <= 1) {
+        barColor  = '#639922'
+        barPct    = Math.max(4, total * 10)   // minimum 4% so bar is always visible
+        badgeBg   = '#EAF3DE'
+        badgeFg   = '#3B6D11'
+        riskText  = 'Low risk'
+        adviceText = 'Great job! Your diet looks good for your teeth.'
+
+      } else if (total <= 7) {
+        barColor  = '#EF9F27'
+        barPct    = total * 10
+        badgeBg   = '#FAEEDA'
+        badgeFg   = '#633806'
+        riskText  = 'Moderate risk'
+        adviceText = 'Consider reducing sugary snacks, especially between meals.'
+
+      } else {
+        barColor  = '#E24B4A'
+        barPct    = 100
+        badgeBg   = '#FCEBEB'
+        badgeFg   = '#791F1F'
+        riskText  = 'High risk'
+        adviceText = 'Try to cut back on sugar significantly and see your dentist regularly.'
+      }
+
+      // Apply the risk bar width and colour
+      const bar = document.getElementById('bar-fill')
+      bar.style.width = barPct + '%'
+      bar.style.backgroundColor = barColor
+
+      // Apply the badge colours and text
+      const badge = document.getElementById('risk-badge')
+      badge.style.background = badgeBg
+      badge.style.color = badgeFg
+      badge.textContent = riskText
+
+      // Update the advice text
+      document.getElementById('advice').textContent = adviceText
+    }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "diet-analysis-app",
+  "version": "1.0.0",
+  "description": "Tooth decay risk calculator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}
