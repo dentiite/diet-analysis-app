@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diet Analysis — Tooth Decay Risk</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦷</text></svg>">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Inter:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F7F6F2;
+      color: #1A1A1A;
+      padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 24px);
+      min-height: 100vh;
+    }
+
+    .header { padding: 28px 20px 0; margin-bottom: 20px; }
+    .header-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      line-height: 1.2;
+    }
+
+    .subtitle { font-size: 14px; color: #888880; line-height: 1.5; }
+
+    .content { padding: 0 16px; max-width: 600px; margin: 0 auto; }
+
+    .card {
+      background: #FFFFFF;
+      border: 0.5px solid #E0DED8;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card-badge { font-size: 11px; color: #BBBBBB; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .card-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+    .card-examples { font-size: 13px; color: #777770; line-height: 1.5; margin-bottom: 14px; }
+    .divider { border: none; border-top: 0.5px solid #EFEFEF; margin-bottom: 14px; }
+
+    .counter-row { display: flex; align-items: center; gap: 8px; }
+    .counter-row-label { font-size: 13px; color: #666660; flex: 1; }
+
+    .btn {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      border: 0.5px solid #D0CEC8;
+      background: #FAFAF8;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #1A1A1A;
+      user-select: none;
+      transition: background 0.1s;
+      touch-action: manipulation;
+    }
+
+    .btn:active { background: #EEECEA; }
+
+    .counter-value {
+      font-family: 'Lora', serif;
+      font-size: 22px;
+      font-weight: 600;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .counter-pts { font-size: 12px; color: #BBBBBB; min-width: 80px; text-align: right; }
+
+    .results {
+      background: #F0EFE9;
+      border: 0.5px solid #D8D6D0;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    .score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+    .score-label { font-size: 14px; color: #666660; }
+    .score-value { font-family: 'Lora', serif; font-size: 40px; font-weight: 600; line-height: 1; }
+
+    .bar-track { height: 8px; border-radius: 4px; background: #E0DED8; margin-bottom: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.35s ease, background-color 0.35s ease; background-color: #639922; }
+
+    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: #BBBBBB; margin-bottom: 14px; }
+
+    .risk-badge { display: inline-block; padding: 5px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+    .advice { font-size: 14px; color: #555550; line-height: 1.6; }
+
+    .footer { text-align: center; font-size: 11px; color: #BBBBBB; padding: 16px 20px 8px; line-height: 1.6; }
+    .footer a { color: #AAAAAA; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-icon">🦷</span>
+    <h1>Diet Analysis</h1>
+    <p class="subtitle">Tooth decay risk calculator · count times per day,<br>at end of meals or between meals</p>
+  </div>
+
+  <div class="content">
+
+    <div class="card">
+      <div class="card-badge">× 1 pt each</div>
+      <div class="card-title">Liquid foods &amp; drinks</div>
+      <div class="card-examples">Soft drinks, fruit juice, cocoa, flavoured yogurt, ice cream, pudding, popsicles</div>
+      <hr class="divider">
+      <div class="counter-row">
+        <span class="counter-row-label">Times per day</span>
+        <button class="btn" onclick="adjust('liquid', -1)">−</button>
+        <span class="counter-value" id="liquid-val">0</span>
+        <button class="btn" onclick="adjust('liquid', 1)">+</button>
+        <span class="counter-pts" id="liquid-pts">0 × 1 = 0 pts</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-badge">× 2 pts each</div>
+      <div class="card-title">Solid &amp; sticky foods</div>
+      <div class="card-examples">Cake, donuts, cookies, chocolate, caramel, dried fruit, jam, jelly, bananas</div>
+      <hr class="divider">
+      <div class="counter-row">
+        <span class="counter-row-label">Times per day</span>
+        <button class="btn" onclick="adjust('solid', -1)">−</button>
+        <span class="counter-value" id="solid-val">0</span>
+        <button class="btn" onclick="adjust('solid', 1)">+</button>
+        <span class="counter-pts" id="solid-pts">0 × 2 = 0 pts</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-badge">× 3 pts each</div>
+      <div class="card-title">Slowly dissolving foods</div>
+      <div class="card-examples">Hard candies, breath mints, antacid tablets, cough drops</div>
+      <hr class="divider">
+      <div class="counter-row">
+        <span class="counter-row-label">Times per day</span>
+        <button class="btn" onclick="adjust('slow', -1)">−</button>
+        <span class="counter-value" id="slow-val">0</span>
+        <button class="btn" onclick="adjust('slow', 1)">+</button>
+        <span class="counter-pts" id="slow-pts">0 × 3 = 0 pts</span>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="score-row">
+        <span class="score-label">Total score</span>
+        <span class="score-value" id="total-score">0</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="bar-fill"></div>
+      </div>
+      <div class="bar-labels">
+        <span>0–1 low</span>
+        <span>2–7 moderate</span>
+        <span>8+ high</span>
+      </div>
+      <div class="risk-badge" id="risk-badge" style="background:#EAF3DE; color:#3B6D11;">Low risk</div>
+      <div class="advice" id="advice">Great job! Your diet looks good for your teeth.</div>
+    </div>
+
+    <p class="footer">
+      Based on the Tufts School of Dental Medicine diet analysis tool.<br>
+      <a href="https://github.com/dentiite/diet-analysis-app">View on GitHub</a>
+    </p>
+
+  </div>
+
+  <script>
+    const categories = {
+      liquid: { count: 0, multiplier: 1 },
+      solid:  { count: 0, multiplier: 2 },
+      slow:   { count: 0, multiplier: 3 },
+    }
+
+    function adjust(key, delta) {
+      categories[key].count = Math.max(0, categories[key].count + delta)
+      update()
+    }
+
+    function update() {
+      let total = 0
+      for (const key in categories) {
+        const cat = categories[key]
+        const pts = cat.count * cat.multiplier
+        total += pts
+        document.getElementById(key + '-val').textContent = cat.count
+        document.getElementById(key + '-pts').textContent =
+          `${cat.count} × ${cat.multiplier} = ${pts} pt${pts !== 1 ? 's' : ''}`
+      }
+      document.getElementById('total-score').textContent = total
+
+      let barColor, barPct, badgeBg, badgeFg, riskText, adviceText
+
+      if (total <= 1) {
+        barColor = '#639922'; barPct = Math.max(4, total * 10)
+        badgeBg = '#EAF3DE'; badgeFg = '#3B6D11'
+        riskText = 'Low risk'
+        adviceText = 'Great job! Your diet looks good for your teeth.'
+      } else if (total <= 7) {
+        barColor = '#EF9F27'; barPct = total * 10
+        badgeBg = '#FAEEDA'; badgeFg = '#633806'
+        riskText = 'Moderate risk'
+        adviceText = 'Consider reducing sugary snacks, especially between meals.'
+      } else {
+        barColor = '#E24B4A'; barPct = 100
+        badgeBg = '#FCEBEB'; badgeFg = '#791F1F'
+        riskText = 'High risk'
+        adviceText = 'Try to cut back on sugar significantly and see your dentist regularly.'
+      }
+
+      const bar = document.getElementById('bar-fill')
+      bar.style.width = barPct + '%'
+      bar.style.backgroundColor = barColor
+
+      const badge = document.getElementById('risk-badge')
+      badge.style.background = badgeBg
+      badge.style.color = badgeFg
+      badge.textContent = riskText
+
+      document.getElementById('advice').textContent = adviceText
+    }
+  </script>
+
+</body>
+</html>
