@@ -23,13 +23,14 @@
 
     h1 {
       font-family: 'Lora', serif;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 600;
       margin-bottom: 5px;
       line-height: 1.2;
     }
 
-    .subtitle { font-size: 15px; color: #888880; line-height: 1.5; }
+    .subtitle1 { font-size: 14px; color: #888880; line-height: 1.5; }
+    .subtitle2 { font-size: 14px; color: #888880; line-height: 1.5; }
 
     .content { padding: 0 16px; max-width: 600px; margin: 0 auto; }
 
@@ -104,7 +105,8 @@
   <div class="header">
     <span class="header-icon">🦷</span>
     <h1>Diet Analysis</h1>
-    <p class="subtitle">Tooth decay risk calculator · count times per day,<br>at end of meals or between meals</p>
+    <p class="subtitle1">Evaluate your risk of tooth decay · Respond for an average day</p>
+    <p class="subtitle2"><br>Select each food item based on the number of times consumed:<br> <strong>1. At the end of meals</strong><br>or<br><strong>2. Between meals (at least 20 minutes apart)</strong></p>
   </div>
 
   <div class="content">
@@ -210,12 +212,12 @@
         barColor = '#EF9F27'; barPct = total * 10
         badgeBg = '#FAEEDA'; badgeFg = '#633806'
         riskText = 'Moderate risk'
-        adviceText = 'Consider reducing sugary snacks, especially between meals.'
+        adviceText = 'Consider reducing sugary or carbohydrate rich snacks, especially between meals.'
       } else {
         barColor = '#E24B4A'; barPct = 100
         badgeBg = '#FCEBEB'; badgeFg = '#791F1F'
         riskText = 'High risk'
-        adviceText = 'Try to cut back on sugar significantly and see your dentist regularly.'
+        adviceText = 'Try to cut back on sugar or carbohydrates significantly and see your dentist regularly.'
       }
 
       const bar = document.getElementById('bar-fill')
