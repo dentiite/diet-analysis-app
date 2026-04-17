@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diet Analysis</title>
+  <title>Dietary Caries Risk Screening</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦷</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Inter:wght@400;500&display=swap');
@@ -13,212 +13,751 @@
     body {
       font-family: 'Inter', sans-serif;
       background: #F7F6F2;
-      color: #24540b;
+      color: #1A1A1A;
       padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 24px);
       min-height: 100vh;
     }
 
-    .header { padding: 28px 20px 0; margin-bottom: 20px; }
-    .header-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+    .header { padding: 28px 20px 16px; max-width: 640px; margin: 0 auto; }
+    .header-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+    h1 { font-family: 'Lora', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
+    .subtitle { font-size: 13px; color: #888880; line-height: 1.6; }
+    .subtitle strong { color: #333330; font-weight: 500; }
 
-    h1 {
-      font-family: 'Lora', serif;
-      font-size: 26px;
-      font-weight: 600;
-      margin-bottom: 5px;
-      line-height: 1.2;
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
     }
 
-    .subtitle1 { font-size: 14px; color: #888880; line-height: 1.5; }
-    .subtitle2 { font-size: 14px; color: #888880; line-height: 1.5; }
+    .name-field { display: flex; flex-direction: column; gap: 5px; }
 
-    .content { padding: 0 16px; max-width: 600px; margin: 0 auto; }
+    .name-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
+    }
 
-    .card {
+    .name-input {
+      width: 100%;
+      border: 1px solid #C8C6C0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #333330;
+      background: #FFFFFF;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .name-input:focus {
+      border-color: #3AACA4;
+      box-shadow: 0 0 0 3px rgba(58,172,164,0.1);
+    }
+
+    .name-input::placeholder { color: #CCCCCC; }
+
+    .content { padding: 0 16px 32px; max-width: 640px; margin: 0 auto; }
+
+    .meal-card {
       background: #FFFFFF;
       border: 0.5px solid #E0DED8;
       border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
     }
 
-    .card-badge { font-size: 11px; color: #BBBBBB; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-    .card-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
-    .card-examples { font-size: 13px; color: #777770; line-height: 1.5; margin-bottom: 14px; }
-    .divider { border: none; border-top: 0.5px solid #EFEFEF; margin-bottom: 14px; }
-
-    .counter-row { display: flex; align-items: center; gap: 8px; }
-    .counter-row-label { font-size: 13px; color: #666660; flex: 1; }
-
-    .btn {
-      width: 44px; height: 44px;
-      border-radius: 10px;
-      border: 0.5px solid #D0CEC8;
-      background: #FAFAF8;
-      font-size: 22px;
+    .meal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
       cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: #1A1A1A;
       user-select: none;
-      transition: background 0.1s;
+      gap: 10px;
+    }
+
+    .meal-header:active { background: #FAFAF8; }
+    .meal-left { display: flex; align-items: center; gap: 10px; }
+    .meal-emoji { font-size: 20px; }
+    .meal-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; }
+    .meal-summary { font-size: 12px; color: #AAAAAA; margin-top: 2px; }
+
+    .meal-chevron { font-size: 12px; color: #BBBBBB; transition: transform 0.2s; flex-shrink: 0; }
+    .meal-chevron.open { transform: rotate(180deg); }
+
+    .meal-body { display: none; border-top: 0.5px solid #F0EFEA; padding: 16px; }
+    .meal-body.open { display: block; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
+      margin-bottom: 8px;
+      margin-top: 14px;
+    }
+
+    .section-label:first-child { margin-top: 0; }
+
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 4px; }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #F7F6F2;
+      border: 0.5px solid #E8E6E0;
+      border-radius: 8px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+      user-select: none;
       touch-action: manipulation;
     }
 
-    .btn:active { background: #EEECEA; }
+    .check-item.checked { background: #E6F4F2; border-color: #8CCBC4; }
 
-    .counter-value {
-      font-family: 'Lora', serif;
-      font-size: 22px;
-      font-weight: 600;
-      min-width: 32px;
-      text-align: center;
+    .check-box {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid #D0CEC8;
+      background: #FFFFFF;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      margin-top: 1px;
+      transition: background 0.1s, border-color 0.1s;
     }
 
-    .counter-pts { font-size: 12px; color: #BBBBBB; min-width: 80px; text-align: right; }
+    .check-item.checked .check-box { background: #3AACA4; border-color: #3AACA4; color: #FFFFFF; }
 
-    .results {
-      background: #F0EFE9;
-      border: 0.5px solid #D8D6D0;
+    .check-main { font-size: 13px; color: #333330; line-height: 1.3; }
+    .check-sub { font-size: 11px; color: #AAAAAA; margin-top: 2px; line-height: 1.3; }
+
+
+    .notes-wrapper { margin-top: 14px; }
+
+    .notes-header { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+
+    .notes-required-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
+    }
+
+    .notes-required-badge {
+      font-size: 10px;
+      font-weight: 500;
+      background: #FFF3CD;
+      color: #856404;
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 0.5px solid #FFE082;
+    }
+
+    .notes-prompt { font-size: 12px; color: #777770; margin-bottom: 6px; line-height: 1.5; }
+
+    .notes-area {
+      width: 100%;
+      border: 1px solid #C8C6C0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: #333330;
+      background: #FFFFFF;
+      resize: vertical;
+      min-height: 72px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .notes-area:focus { border-color: #8BBF50; box-shadow: 0 0 0 3px rgba(99,153,34,0.08); }
+    .notes-area::placeholder { color: #CCCCCC; }
+
+    .meal-risk-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #E0DED8;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    /* PRACTITIONER PANEL */
+    .practitioner-panel {
+      background: #FFFFFF;
+      border: 1px solid #C8C6C0;
       border-radius: 14px;
-      padding: 18px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .practitioner-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      background: #1A1A1A;
+    }
+
+    .practitioner-header-title {
+      font-family: 'Lora', serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: #FFFFFF;
+      flex: 1;
+    }
+
+    .practitioner-badge {
+      font-size: 10px;
+      font-weight: 500;
+      background: #333330;
+      color: #888880;
+      padding: 3px 9px;
+      border-radius: 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .practitioner-body { padding: 18px; }
+
+    .breakdown-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 0.5px solid #F0EFEA;
+      gap: 10px;
+    }
+
+    .breakdown-row:last-of-type { border-bottom: none; }
+
+    .breakdown-row.flagged {
+      background: #FFF8F8;
+      border-radius: 8px;
+      padding: 10px 10px;
+      border: 0.5px solid #F0A0A0;
+      margin-bottom: 6px;
+    }
+
+    .breakdown-left { flex: 1; min-width: 0; }
+    .breakdown-meal { font-size: 13px; font-weight: 500; color: #333330; margin-bottom: 2px; }
+    .breakdown-notes { font-size: 12px; color: #888880; font-style: italic; line-height: 1.4; margin-top: 3px; }
+
+    .breakdown-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+
+    .tag { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; white-space: nowrap; }
+    .tag-ok   { background: #EAF3DE; color: #3B6D11; }
+    .tag-risk { background: #FCEBEB; color: #791F1F; }
+    .tag-none { background: #F0EFE9; color: #AAAAAA; }
+    .tag-fermentable { background: #FAEEDA; color: #633806; }
+
+    .overall-section { margin-top: 16px; padding-top: 16px; border-top: 0.5px solid #E8E6E0; }
+
+    .overall-title {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
       margin-bottom: 12px;
     }
 
-    .score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
-    .score-label { font-size: 14px; color: #666660; }
-    .score-value { font-family: 'Lora', serif; font-size: 40px; font-weight: 600; line-height: 1; }
+    .score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .score-label { font-size: 13px; color: #666660; }
+    .score-value { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; line-height: 1; }
 
-    .bar-track { height: 8px; border-radius: 4px; background: #E0DED8; margin-bottom: 6px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.35s ease, background-color 0.35s ease; background-color: #639922; }
-
-    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: #BBBBBB; margin-bottom: 14px; }
+    .bar-track { height: 8px; border-radius: 4px; background: #E8E6E0; margin-bottom: 5px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.4s ease, background-color 0.4s ease; background-color: #639922; }
+    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: #BBBBBB; margin-bottom: 12px; }
 
     .risk-badge { display: inline-block; padding: 5px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-bottom: 10px; }
-    .advice { font-size: 14px; color: #555550; line-height: 1.6; }
 
-    .footer { text-align: center; font-size: 11px; color: #BBBBBB; padding: 16px 20px 8px; line-height: 1.6; }
+    .clinical-note {
+      font-size: 13px;
+      color: #444440;
+      line-height: 1.7;
+      background: #F7F6F2;
+      border-left: 3px solid #C8C6C0;
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .footer { text-align: center; font-size: 11px; color: #BBBBBB; padding: 8px 20px 8px; line-height: 1.6; }
     .footer a { color: #AAAAAA; }
-    .subtitle2 {text-align: center;}
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #1A1A1A;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+      touch-action: manipulation;
+    }
+
+    .submit-btn:hover { background: #333330; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { background: #AAAAAA; cursor: not-allowed; transform: none; }
+
+    .submit-status {
+      margin-top: 12px;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.6;
+      min-height: 20px;
+    }
   </style>
 </head>
 <body>
 
   <div class="header">
     <span class="header-icon">🦷</span>
-    <h1>Diet Analysis</h1>
-    <p class="subtitle1">Evaluate your risk of tooth decay</p>
-    <p class="subtitle2"><br>For an average day: select the number of times a food type is consumed:<br> <strong>1. At the end of a meal</strong><br><strong>2. Between meals (at least 20 minutes apart)</strong></p>
+    <h1>Dietary Caries Risk Screening</h1>
+    <p class="subtitle">
+      For a <strong>typical day</strong>, expand each meal eaten and select if a given food and/or drink type is consumed. If no food is eaten (e.g. skipping breakfast), just leave it blank.
+      A detailed meal description is required for each section to generate an accurate clinical assessment.
+    </p>
+    <div class="name-row">
+      <div class="name-field">
+        <label class="name-label" for="first-name">First name</label>
+        <input class="name-input" type="text" id="first-name" placeholder="e.g. Jane" autocomplete="given-name">
+      </div>
+      <div class="name-field">
+        <label class="name-label" for="last-name">Last name</label>
+        <input class="name-input" type="text" id="last-name" placeholder="e.g. Doe" autocomplete="family-name">
+      </div>
+    </div>
   </div>
 
+  <div class="content" id="main-content"></div>
+
   <div class="content">
-
-    <div class="card">
-      <div class="card-badge">× 1 pt each</div>
-      <div class="card-title">Liquid foods &amp; drinks</div>
-      <div class="card-examples">Soft drinks, fruit juice, cocoa, flavoured yogurt, ice cream, pudding, popsicles</div>
-      <hr class="divider">
-      <div class="counter-row">
-        <span class="counter-row-label">Times per day</span>
-        <button class="btn" onclick="adjust('liquid', -1)">−</button>
-        <span class="counter-value" id="liquid-val">0</span>
-        <button class="btn" onclick="adjust('liquid', 1)">+</button>
-        <span class="counter-pts" id="liquid-pts">0 × 1 = 0 pts</span>
+    <div class="practitioner-panel">
+      <div class="practitioner-header">
+        <span class="practitioner-header-title">Practitioner View</span>
+        <span class="practitioner-badge">Clinical Use</span>
+      </div>
+      <div class="practitioner-body">
+        <div id="breakdown-list"></div>
+        <div class="overall-section">
+          <div class="overall-title">Overall caries risk score</div>
+          <div class="score-row">
+            <span class="score-label">Total score</span>
+            <span class="score-value" id="total-score">0</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+          <div class="bar-labels"><span>Low</span><span>Moderate</span><span>High</span></div>
+          <div class="risk-badge" id="risk-badge" style="background:#E6F4F2;color:#1D6E6A;">Low risk</div>
+          <div class="clinical-note" id="clinical-note">No items recorded. Complete the dietary history above to generate a clinical summary.</div>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-badge">× 2 pts each</div>
-      <div class="card-title">Solid &amp; sticky foods</div>
-      <div class="card-examples">Cake, chips, pretzels, donuts, cookies, chocolate, caramel, dried fruit</div>
-      <hr class="divider">
-      <div class="counter-row">
-        <span class="counter-row-label">Times per day</span>
-        <button class="btn" onclick="adjust('solid', -1)">−</button>
-        <span class="counter-value" id="solid-val">0</span>
-        <button class="btn" onclick="adjust('solid', 1)">+</button>
-        <span class="counter-pts" id="solid-pts">0 × 2 = 0 pts</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-badge">× 3 pts each</div>
-      <div class="card-title">Slowly dissolving foods</div>
-      <div class="card-examples">Hard candies, breath mints, antacid tablets, cough drops</div>
-      <hr class="divider">
-      <div class="counter-row">
-        <span class="counter-row-label">Times per day</span>
-        <button class="btn" onclick="adjust('slow', -1)">−</button>
-        <span class="counter-value" id="slow-val">0</span>
-        <button class="btn" onclick="adjust('slow', 1)">+</button>
-        <span class="counter-pts" id="slow-pts">0 × 3 = 0 pts</span>
-      </div>
-    </div>
-
-    <div class="results">
-      <div class="score-row">
-        <span class="score-label">Total score</span>
-        <span class="score-value" id="total-score">0</span>
-      </div>
-      <div class="bar-track">
-        <div class="bar-fill" id="bar-fill"></div>
-      </div>
-      <div class="bar-labels">
-        <span>0–1 low</span>
-        <span>2–7 moderate</span>
-        <span>8+ high</span>
-      </div>
-      <div class="risk-badge" id="risk-badge" style="background:#EAF3DE; color:#3B6D11;">Low risk</div>
-      <div class="advice" id="advice">Great job! Your diet looks good for your teeth.</div>
-    </div>
-
+    //footer here if you ever want to add one
     <p class="footer">
-      Inspired by the Tufts School of Dental Medicine diet analysis tool.<br>
+      <br>
       <a href="https://github.com/dentiite/diet-analysis-app">View on GitHub</a>
     </p>
 
+    <!-- SUBMIT BUTTON -->
+    <button class="submit-btn" onclick="submitForm()">Submit screening</button>
+
+    <!-- SUBMISSION STATUS MESSAGE -->
+    <div class="submit-status" id="submit-status"></div>
   </div>
 
+
   <script>
-    const categories = {
-      liquid: { count: 0, multiplier: 1 },
-      solid:  { count: 0, multiplier: 2 },
-      slow:   { count: 0, multiplier: 3 },
+    const MEALS = [
+      { id: 'breakfast',       name: 'Breakfast',       emoji: '🌅', multiplier: 1   },
+      { id: 'morning-snack',   name: 'Morning Snack',   emoji: '🍎', multiplier: 1.5 },
+      { id: 'lunch',           name: 'Lunch',           emoji: '🥗', multiplier: 1   },
+      { id: 'afternoon-snack', name: 'Afternoon Snack', emoji: '🧃', multiplier: 1.5 },
+      { id: 'dinner',          name: 'Dinner',          emoji: '🍽️', multiplier: 1   },
+      { id: 'evening-snack',   name: 'Evening Snack',   emoji: '🌙', multiplier: 3   },
+    ]
+
+    const DRINKS = [
+      { id: 'nonsugary',  label: 'Non-sugary',          sublabel: 'Water, milk, black coffee',        sugary: false, weight: 0 },
+      { id: 'sugary-drk', label: 'Sugar-containing',    sublabel: 'Juice, soda, sports drinks',       sugary: true,  weight: 2 },
+      { id: 'diet-drk',   label: 'Zero-calorie / Diet', sublabel: 'Artificially sweetened beverages', sugary: false, weight: 1 },
+    ]
+
+    const FOODS = [
+      { id: 'starch',     label: 'Starch',          sublabel: 'Bread, rice, pasta',        sugary: false, fermentable: false, weight: 1   },
+      { id: 'fruit',      label: 'Fruit',           sublabel: 'Tap to specify type',       sugary: true,  fermentable: false, weight: 0,
+        subitems: [
+          { id: 'fruit-fresh',  label: 'Fresh fruit',   sublabel: 'Whole or cut',              sugary: true, weight: 1 },
+          { id: 'fruit-canned', label: 'Canned fruit',  sublabel: 'In syrup or juice',         sugary: true, weight: 1 },
+          { id: 'fruit-dried',  label: 'Dried fruit',   sublabel: 'Raisins, dates, apricots',  sugary: true, weight: 2 },
+        ]
+      },
+      { id: 'sweet',      label: 'Sugary / Sweet',  sublabel: 'Candy, dessert, chocolate', sugary: true,  fermentable: false, weight: 2   },
+      { id: 'snack-carb', label: 'Snacking carbs',  sublabel: 'Chips, pretzels, crackers', sugary: false, fermentable: true,  weight: 1.5 },
+    ]
+
+
+    const state = {}
+    MEALS.forEach(m => { state[m.id] = { foods: new Set(), drinks: new Set(), fruitSubs: new Set() } })
+
+    function buildCards() {
+      const container = document.getElementById('main-content')
+      container.innerHTML = ''
+
+      MEALS.forEach((meal, idx) => {
+        const card = document.createElement('div')
+        card.className = 'meal-card'
+        card.id = `card-${meal.id}`
+
+        const header = document.createElement('div')
+        header.className = 'meal-header'
+        header.innerHTML = `
+          <div class="meal-left">
+            <span class="meal-emoji">${meal.emoji}</span>
+            <div>
+              <div class="meal-name">${meal.name}</div>
+              <div class="meal-summary" id="summary-${meal.id}">Nothing recorded</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="meal-risk-dot" id="dot-${meal.id}"></div>
+            <span class="meal-chevron ${idx === 0 ? 'open' : ''}" id="chev-${meal.id}">▼</span>
+          </div>`
+        header.addEventListener('click', () => toggleMeal(meal.id))
+        card.appendChild(header)
+
+        const body = document.createElement('div')
+        body.className = `meal-body ${idx === 0 ? 'open' : ''}`
+        body.id = `body-${meal.id}`
+
+        const drinkLabel = document.createElement('div')
+        drinkLabel.className = 'section-label'
+        drinkLabel.textContent = 'Drinks'
+        body.appendChild(drinkLabel)
+
+        const drinkGrid = document.createElement('div')
+        drinkGrid.className = 'checkbox-grid'
+        DRINKS.forEach(d => drinkGrid.appendChild(makeCheckItem(meal.id, 'drinks', d)))
+        body.appendChild(drinkGrid)
+
+        const foodLabel = document.createElement('div')
+        foodLabel.className = 'section-label'
+        foodLabel.textContent = 'Foods'
+        body.appendChild(foodLabel)
+
+        const foodGrid = document.createElement('div')
+        foodGrid.className = 'checkbox-grid'
+
+        FOODS.forEach(f => {
+          if (f.subitems) {
+            // Fruit parent — spans full width, has expandable sub-row beneath
+            const wrapper = document.createElement('div')
+            wrapper.style.cssText = 'grid-column: 1 / -1;'
+
+            const parentItem = makeCheckItem(meal.id, 'foods', f)
+            parentItem.style.marginBottom = '0'
+            wrapper.appendChild(parentItem)
+
+            // Sub-items container — hidden until parent checked
+            const subRow = document.createElement('div')
+            subRow.id = `fruit-subs-${meal.id}`
+            subRow.style.cssText = 'display:none; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:7px;'
+            subRow.style.display = 'none'
+
+            f.subitems.forEach(sub => {
+              subRow.appendChild(makeSubItem(meal.id, sub))
+            })
+
+            wrapper.appendChild(subRow)
+            foodGrid.appendChild(wrapper)
+          } else {
+            foodGrid.appendChild(makeCheckItem(meal.id, 'foods', f))
+          }
+        })
+
+        body.appendChild(foodGrid)
+
+        const notesWrapper = document.createElement('div')
+        notesWrapper.className = 'notes-wrapper'
+
+        const notesHeader = document.createElement('div')
+        notesHeader.className = 'notes-header'
+        const notesLbl = document.createElement('span')
+        notesLbl.className = 'notes-required-label'
+        notesLbl.textContent = 'Meal description'
+        const notesBadge = document.createElement('span')
+        notesBadge.className = 'notes-required-badge'
+        notesBadge.textContent = 'Required'
+        notesHeader.appendChild(notesLbl)
+        notesHeader.appendChild(notesBadge)
+        notesWrapper.appendChild(notesHeader)
+
+        const notesPrompt = document.createElement('p')
+        notesPrompt.className = 'notes-prompt'
+        notesPrompt.textContent = 'Please describe what was consumed at this meal or snack.'
+        notesWrapper.appendChild(notesPrompt)
+
+        const textarea = document.createElement('textarea')
+        textarea.className = 'notes-area'
+        textarea.placeholder = 'e.g. Bowl of oatmeal with brown sugar, glass of orange juice, black coffee'
+        textarea.id = `notes-${meal.id}`
+        notesWrapper.appendChild(textarea)
+
+        body.appendChild(notesWrapper)
+        card.appendChild(body)
+        container.appendChild(card)
+      })
     }
 
-    function adjust(key, delta) {
-      categories[key].count = Math.max(0, categories[key].count + delta)
-      update()
+    function makeCheckItem(mealId, type, item) {
+      const div = document.createElement('div')
+      div.className = 'check-item'
+      div.id = `check-${mealId}-${type}-${item.id}`
+
+      const box = document.createElement('div')
+      box.className = 'check-box'
+      box.id = `box-${mealId}-${type}-${item.id}`
+
+      const labelWrap = document.createElement('div')
+      const mainLbl = document.createElement('div')
+      mainLbl.className = 'check-main'
+      mainLbl.textContent = item.label
+      const subLbl = document.createElement('div')
+      subLbl.className = 'check-sub'
+      subLbl.textContent = item.sublabel
+      labelWrap.appendChild(mainLbl)
+      labelWrap.appendChild(subLbl)
+
+      div.appendChild(box)
+      div.appendChild(labelWrap)
+      div.addEventListener('click', () => toggleCheck(mealId, type, item))
+      return div
     }
 
-    function update() {
-      let total = 0
-      for (const key in categories) {
-        const cat = categories[key]
-        const pts = cat.count * cat.multiplier
-        total += pts
-        document.getElementById(key + '-val').textContent = cat.count
-        document.getElementById(key + '-pts').textContent =
-          `${cat.count} × ${cat.multiplier} = ${pts} pt${pts !== 1 ? 's' : ''}`
+    // Sub-item chips shown when Fruit parent is checked
+    function makeSubItem(mealId, sub) {
+      const div = document.createElement('div')
+      div.className = `check-item${sub.highRisk ? ' high-risk' : ''}`
+      div.id = `check-${mealId}-fruitsub-${sub.id}`
+      div.style.fontSize = '12px'
+
+      const box = document.createElement('div')
+      box.className = 'check-box'
+      box.id = `box-${mealId}-fruitsub-${sub.id}`
+
+      const labelWrap = document.createElement('div')
+      const mainLbl = document.createElement('div')
+      mainLbl.className = 'check-main'
+      mainLbl.style.fontSize = '12px'
+      mainLbl.textContent = sub.label
+      const subLbl = document.createElement('div')
+      subLbl.className = 'check-sub'
+      subLbl.textContent = sub.sublabel
+      labelWrap.appendChild(mainLbl)
+      labelWrap.appendChild(subLbl)
+
+      div.appendChild(box)
+      div.appendChild(labelWrap)
+      div.addEventListener('click', () => toggleFruitSub(mealId, sub))
+      return div
+    }
+
+    function toggleMeal(mealId) {
+      document.getElementById(`body-${mealId}`).classList.toggle('open')
+      document.getElementById(`chev-${mealId}`).classList.toggle('open')
+    }
+
+    function toggleCheck(mealId, type, item) {
+      const set = state[mealId][type]
+      const elem = document.getElementById(`check-${mealId}-${type}-${item.id}`)
+      const box  = document.getElementById(`box-${mealId}-${type}-${item.id}`)
+
+      if (set.has(item.id)) {
+        set.delete(item.id)
+        elem.classList.remove('checked', 'sugary')
+        box.textContent = ''
+        // If this is the Fruit parent, hide and clear sub-items
+        if (item.subitems) {
+          const subRow = document.getElementById(`fruit-subs-${mealId}`)
+          if (subRow) subRow.style.display = 'none'
+          item.subitems.forEach(sub => {
+            state[mealId].fruitSubs.delete(sub.id)
+            const subElem = document.getElementById(`check-${mealId}-fruitsub-${sub.id}`)
+            const subBox  = document.getElementById(`box-${mealId}-fruitsub-${sub.id}`)
+            if (subElem) subElem.classList.remove('checked', 'sugary')
+            if (subBox)  subBox.textContent = ''
+          })
+        }
+      } else {
+        set.add(item.id)
+        elem.classList.add('checked')
+        box.textContent = '✓'
+        // If this is the Fruit parent, show sub-items
+        if (item.subitems) {
+          const subRow = document.getElementById(`fruit-subs-${mealId}`)
+          if (subRow) subRow.style.display = 'grid'
+        }
       }
-      document.getElementById('total-score').textContent = total
 
-      let barColor, barPct, badgeBg, badgeFg, riskText, adviceText
+      updateSummary(mealId)
+      updateResults()
+    }
 
-      if (total <= 1) {
-        barColor = '#639922'; barPct = Math.max(4, total * 10)
-        badgeBg = '#EAF3DE'; badgeFg = '#3B6D11'
+    function toggleFruitSub(mealId, sub) {
+      const set  = state[mealId].fruitSubs
+      const elem = document.getElementById(`check-${mealId}-fruitsub-${sub.id}`)
+      const box  = document.getElementById(`box-${mealId}-fruitsub-${sub.id}`)
+
+      if (set.has(sub.id)) {
+        set.delete(sub.id)
+        elem.classList.remove('checked', 'sugary')
+        box.textContent = ''
+      } else {
+        set.add(sub.id)
+        elem.classList.add('checked')
+        box.textContent = '✓'
+      }
+
+      updateSummary(mealId)
+      updateResults()
+    }
+
+    function updateSummary(mealId) {
+      const s = state[mealId]
+      const fruitSubLabels = [...s.fruitSubs].map(id => {
+        for (const f of FOODS) {
+          if (f.subitems) { const sub = f.subitems.find(x => x.id === id); if (sub) return sub.label }
+        }
+      }).filter(Boolean)
+
+      const labels = [
+        ...[...s.drinks].map(id => DRINKS.find(d => d.id === id)?.label),
+        ...[...s.foods].filter(id => id !== 'fruit').map(id => FOODS.find(f => f.id === id)?.label),
+        ...(s.foods.has('fruit') && fruitSubLabels.length > 0 ? fruitSubLabels : s.foods.has('fruit') ? ['Fruit'] : []),
+      ].filter(Boolean)
+
+      const summaryEl = document.getElementById(`summary-${mealId}`)
+      const dotEl     = document.getElementById(`dot-${mealId}`)
+
+      if (labels.length === 0) {
+        summaryEl.textContent = 'Nothing recorded'
+        dotEl.style.background = '#E0DED8'
+      } else {
+        summaryEl.textContent = labels.join(', ')
+        dotEl.style.background = '#3AACA4'
+      }
+    }
+
+    function updateResults() {
+      const breakdownList = document.getElementById('breakdown-list')
+      breakdownList.innerHTML = ''
+      let totalScore = 0
+
+      MEALS.forEach(meal => {
+        const s = state[meal.id]
+        let rawScore = 0
+        s.foods.forEach(id => {
+          if (id === 'fruit') return
+          const f = FOODS.find(x => x.id === id)
+          if (f) rawScore += f.weight
+        })
+        s.fruitSubs.forEach(id => {
+          for (const f of FOODS) {
+            if (f.subitems) { const sub = f.subitems.find(x => x.id === id); if (sub) rawScore += sub.weight }
+          }
+        })
+        s.drinks.forEach(id => { const d = DRINKS.find(x => x.id === id); if (d) rawScore += d.weight })
+
+        // Apply timing multiplier — snacks score higher, evening snack highest
+        const mealScore = rawScore * meal.multiplier
+        totalScore += mealScore
+
+        const sugaryItems = [
+          ...[...s.drinks].filter(id => DRINKS.find(d => d.id === id)?.sugary).map(id => DRINKS.find(d => d.id === id).label),
+          ...[...s.foods].filter(id => id !== 'fruit' && FOODS.find(f => f.id === id)?.sugary).map(id => FOODS.find(f => f.id === id).label),
+          ...[...s.fruitSubs].map(id => { for (const f of FOODS) { if (f.subitems) { const sub = f.subitems.find(x => x.id === id); if (sub) return sub.label } } }).filter(Boolean),
+        ]
+        const fermentableItems = [
+          ...[...s.foods].filter(id => id !== 'fruit' && FOODS.find(f => f.id === id)?.fermentable).map(id => FOODS.find(f => f.id === id).label),
+        ]
+        const safeCount = [...s.drinks].filter(id => !DRINKS.find(d => d.id === id)?.sugary).length
+                        + [...s.foods].filter(id => id !== 'fruit' && !FOODS.find(f => f.id === id)?.sugary && !FOODS.find(f => f.id === id)?.fermentable).length
+        const notes = document.getElementById(`notes-${meal.id}`)?.value?.trim()
+
+        const row = document.createElement('div')
+        row.className = 'breakdown-row'
+
+        const left = document.createElement('div')
+        left.className = 'breakdown-left'
+        const mealLbl = document.createElement('div')
+        mealLbl.className = 'breakdown-meal'
+        const multiplierLabel = meal.multiplier > 1 ? ` <span style="font-size:11px;font-weight:400;color:#AAAAAA;">×${meal.multiplier} timing</span>` : ''
+        const scoreLabel = rawScore > 0 ? ` <span style="font-size:11px;font-weight:400;color:#888880;">· score ${Math.round(mealScore)}</span>` : ''
+        mealLbl.innerHTML = `${meal.emoji} ${meal.name}${multiplierLabel}${scoreLabel}`
+        left.appendChild(mealLbl)
+        if (notes) {
+          const notesEl = document.createElement('div')
+          notesEl.className = 'breakdown-notes'
+          notesEl.textContent = `"${notes}"`
+          left.appendChild(notesEl)
+        }
+        row.appendChild(left)
+
+        const tags = document.createElement('div')
+        tags.className = 'breakdown-tags'
+        if (s.foods.size === 0 && s.drinks.size === 0 && s.fruitSubs.size === 0) {
+          tags.innerHTML = `<span class="tag tag-none">Not recorded</span>`
+        } else {
+          if (sugaryItems.length > 0) tags.innerHTML += `<span class="tag tag-risk">${sugaryItems.join(', ')}</span>`
+          if (fermentableItems.length > 0) tags.innerHTML += `<span class="tag tag-fermentable">${fermentableItems.join(', ')}</span>`
+          if (safeCount > 0) tags.innerHTML += `<span class="tag tag-ok">${safeCount} low-risk</span>`
+        }
+        row.appendChild(tags)
+        breakdownList.appendChild(row)
+      })
+
+      document.getElementById('total-score').textContent = Math.round(totalScore)
+
+      let barColor, barPct, badgeBg, badgeFg, riskText, clinicalNote
+
+      if (totalScore === 0) {
+        barColor = '#3AACA4'; barPct = 2
+        badgeBg = '#E6F4F2'; badgeFg = '#1D6E6A'
         riskText = 'Low risk'
-        adviceText = 'Great job! Your diet looks good for your teeth.'
-      } else if (total <= 7) {
-        barColor = '#EF9F27'; barPct = total * 10
+        clinicalNote = 'No dietary risk items recorded. Confirm that the patient has completed the diet history above.'
+      } else if (totalScore <= 6) {
+        barColor = '#3AACA4'; barPct = Math.max(8, totalScore * 4)
+        badgeBg = '#E6F4F2'; badgeFg = '#1D6E6A'
+        riskText = 'Low risk'
+        clinicalNote = `Score ${Math.round(totalScore)}. Low exposure to fermentable carbohydrates. Review history and confirm adequate fluoride exposure.`
+      } else if (totalScore <= 16) {
+        barColor = '#EF9F27'; barPct = Math.min(95, totalScore * 4)
         badgeBg = '#FAEEDA'; badgeFg = '#633806'
         riskText = 'Moderate risk'
-        adviceText = 'Consider reducing sugary or carbohydrate rich snacks, especially between meals.'
+        clinicalNote = `Score ${Math.round(totalScore)}. Moderate fermentable carbohydrate exposure noted, possibly exacerbated by timing of intake. Consider counseling on reducing between-meal sugar intake and applying fluoride varnish.`
       } else {
         barColor = '#E24B4A'; barPct = 100
         badgeBg = '#FCEBEB'; badgeFg = '#791F1F'
         riskText = 'High risk'
-        adviceText = 'Try to cut back on sugar or carbohydrates significantly and see your dentist regularly.'
+        clinicalNote = `Score ${Math.round(totalScore)}. High intake, frequency, and/or deleterious timing of fermentable carbohydrates. Consider comprehensive dietary counselling, prescription-strength fluoride, and recall frequency.`
       }
 
       const bar = document.getElementById('bar-fill')
@@ -230,7 +769,105 @@
       badge.style.color = badgeFg
       badge.textContent = riskText
 
-      document.getElementById('advice').textContent = adviceText
+      document.getElementById('clinical-note').textContent = clinicalNote
+    }
+
+    buildCards()
+    updateResults()
+
+    document.addEventListener('input', e => {
+      if (e.target.classList.contains('notes-area')) updateResults()
+    })
+
+   
+
+    async function submitForm() {
+      const FORMSPREE_URL = 'https://formspree.io/f/mojyjyjp'
+
+      // Collect patient name
+      const firstName = document.getElementById('first-name').value.trim()
+      const lastName  = document.getElementById('last-name').value.trim()
+
+      // Validate — require at least a name before submitting
+      if (!firstName || !lastName) {
+        showStatus('Please enter the patient\'s first and last name before submitting.', 'warn')
+        return
+      }
+
+      // Disable button while submitting
+      const btn = document.querySelector('.submit-btn')
+      btn.disabled = true
+      btn.textContent = 'Submitting…'
+
+      // Build the data payload — one entry per meal
+      const payload = {
+        patient_name: `${firstName} ${lastName}`,
+        total_score: Math.round(
+          MEALS.reduce((sum, meal) => {
+            const s = state[meal.id]
+            let raw = 0
+            s.foods.forEach(id => {
+              if (id === 'fruit') return
+              const f = FOODS.find(x => x.id === id)
+              if (f) raw += f.weight
+            })
+            s.fruitSubs.forEach(id => {
+              for (const f of FOODS) {
+                if (f.subitems) { const sub = f.subitems.find(x => x.id === id); if (sub) raw += sub.weight }
+              }
+            })
+            s.drinks.forEach(id => { const d = DRINKS.find(x => x.id === id); if (d) raw += d.weight })
+            return sum + raw * meal.multiplier
+          }, 0)
+        ),
+        risk_level: document.getElementById('risk-badge').textContent,
+      }
+
+      // Add a row for each meal with its selections and notes
+      MEALS.forEach(meal => {
+        const s = state[meal.id]
+
+        const foodLabels = [
+          ...[...s.drinks].map(id => DRINKS.find(d => d.id === id)?.label),
+          ...[...s.foods].filter(id => id !== 'fruit').map(id => FOODS.find(f => f.id === id)?.label),
+          ...[...s.fruitSubs].map(id => {
+            for (const f of FOODS) {
+              if (f.subitems) { const sub = f.subitems.find(x => x.id === id); if (sub) return sub.label }
+            }
+          }),
+        ].filter(Boolean)
+
+        const notes = document.getElementById(`notes-${meal.id}`)?.value?.trim()
+
+        payload[`${meal.name} — selections`] = foodLabels.length > 0 ? foodLabels.join(', ') : 'Nothing recorded'
+        payload[`${meal.name} — notes`]      = notes || '—'
+      })
+
+      // Send to Formspree
+      try {
+        const response = await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        if (response.ok) {
+          showStatus(`Screening for ${firstName} ${lastName} submitted successfully.`, 'ok')
+          btn.textContent = 'Submitted ✓'
+        } else {
+          throw new Error('Server error')
+        }
+      } catch (err) {
+        showStatus('Something went wrong. Please check your connection and try again.', 'error')
+        btn.disabled = false
+        btn.textContent = 'Submit screening'
+      }
+    }
+
+    function showStatus(message, type) {
+      const el = document.getElementById('submit-status')
+      el.textContent = message
+      el.style.color = type === 'ok' ? '#1D6E6A' : type === 'warn' ? '#633806' : '#791F1F'
     }
   </script>
 
