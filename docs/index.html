@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dietary Caries Risk Screening</title>
+  <title>Dietary Caries Risk Screening</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦷</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Inter:wght@400;500&display=swap');
@@ -14,10 +15,46 @@
       font-family: 'Inter', sans-serif;
       background: #F7F6F2;
       color: #1A1A1A;
+      color: #1A1A1A;
       padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 24px);
       min-height: 100vh;
     }
 
+    .header { padding: 28px 20px 16px; max-width: 640px; margin: 0 auto; }
+    .header-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+    h1 { font-family: 'Lora', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
+    .subtitle { font-size: 13px; color: #888880; line-height: 1.6; }
+    .subtitle strong { color: #333330; font-weight: 500; }
+
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .name-field { display: flex; flex-direction: column; gap: 5px; }
+
+    .name-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
+    }
+
+    .name-input {
+      width: 100%;
+      border: 1px solid #C8C6C0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #333330;
+      background: #FFFFFF;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
     .header { padding: 28px 20px 16px; max-width: 640px; margin: 0 auto; }
     .header-icon { font-size: 32px; margin-bottom: 10px; display: block; }
     h1 { font-family: 'Lora', serif; font-size: 24px; font-weight: 600; margin-bottom: 6px; line-height: 1.2; }
@@ -62,15 +99,61 @@
     .name-input::placeholder { color: #CCCCCC; }
 
     .content { padding: 0 16px 32px; max-width: 640px; margin: 0 auto; }
+    .name-input:focus {
+      border-color: #3AACA4;
+      box-shadow: 0 0 0 3px rgba(58,172,164,0.1);
+    }
 
+    .name-input::placeholder { color: #CCCCCC; }
+
+    .content { padding: 0 16px 32px; max-width: 640px; margin: 0 auto; }
+
+    .meal-card {
     .meal-card {
       background: #FFFFFF;
       border: 0.5px solid #E0DED8;
       border-radius: 14px;
       margin-bottom: 14px;
       overflow: hidden;
+      margin-bottom: 14px;
+      overflow: hidden;
     }
 
+    .meal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      gap: 10px;
+    }
+
+    .meal-header:active { background: #FAFAF8; }
+    .meal-left { display: flex; align-items: center; gap: 10px; }
+    .meal-emoji { font-size: 20px; }
+    .meal-name { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; }
+    .meal-summary { font-size: 12px; color: #AAAAAA; margin-top: 2px; }
+
+    .meal-chevron { font-size: 12px; color: #BBBBBB; transition: transform 0.2s; flex-shrink: 0; }
+    .meal-chevron.open { transform: rotate(180deg); }
+
+    .meal-body { display: none; border-top: 0.5px solid #F0EFEA; padding: 16px; }
+    .meal-body.open { display: block; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
+      margin-bottom: 8px;
+      margin-top: 14px;
+    }
+
+    .section-label:first-child { margin-top: 0; }
+
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 4px; }
     .meal-header {
       display: flex;
       align-items: center;
@@ -115,7 +198,16 @@
       border: 0.5px solid #E8E6E0;
       border-radius: 8px;
       padding: 9px 10px;
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #F7F6F2;
+      border: 0.5px solid #E8E6E0;
+      border-radius: 8px;
+      padding: 9px 10px;
       cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
       transition: background 0.1s, border-color 0.1s;
       user-select: none;
       touch-action: manipulation;
@@ -212,9 +304,43 @@
     }
 
     .practitioner-header-title {
+    .practitioner-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      background: #1A1A1A;
+    }
+
+    .practitioner-header-title {
       font-family: 'Lora', serif;
       font-size: 15px;
+      font-size: 15px;
       font-weight: 600;
+      color: #FFFFFF;
+      flex: 1;
+    }
+
+    .practitioner-badge {
+      font-size: 10px;
+      font-weight: 500;
+      background: #333330;
+      color: #888880;
+      padding: 3px 9px;
+      border-radius: 5px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .practitioner-body { padding: 18px; }
+
+    .breakdown-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 0.5px solid #F0EFEA;
+      gap: 10px;
       color: #FFFFFF;
       flex: 1;
     }
@@ -256,7 +382,36 @@
     .breakdown-notes { font-size: 12px; color: #888880; font-style: italic; line-height: 1.4; margin-top: 3px; }
 
     .breakdown-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+    .breakdown-row:last-of-type { border-bottom: none; }
 
+    .breakdown-row.flagged {
+      background: #FFF8F8;
+      border-radius: 8px;
+      padding: 10px 10px;
+      border: 0.5px solid #F0A0A0;
+      margin-bottom: 6px;
+    }
+
+    .breakdown-left { flex: 1; min-width: 0; }
+    .breakdown-meal { font-size: 13px; font-weight: 500; color: #333330; margin-bottom: 2px; }
+    .breakdown-notes { font-size: 12px; color: #888880; font-style: italic; line-height: 1.4; margin-top: 3px; }
+
+    .breakdown-tags { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+
+    .tag { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; white-space: nowrap; }
+    .tag-ok   { background: #EAF3DE; color: #3B6D11; }
+    .tag-risk { background: #FCEBEB; color: #791F1F; }
+    .tag-none { background: #F0EFE9; color: #AAAAAA; }
+    .tag-fermentable { background: #FAEEDA; color: #633806; }
+
+    .overall-section { margin-top: 16px; padding-top: 16px; border-top: 0.5px solid #E8E6E0; }
+
+    .overall-title {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #AAAAAA;
     .tag { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 500; white-space: nowrap; }
     .tag-ok   { background: #EAF3DE; color: #3B6D11; }
     .tag-risk { background: #FCEBEB; color: #791F1F; }
@@ -277,7 +432,13 @@
     .score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
     .score-label { font-size: 13px; color: #666660; }
     .score-value { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; line-height: 1; }
+    .score-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .score-label { font-size: 13px; color: #666660; }
+    .score-value { font-family: 'Lora', serif; font-size: 36px; font-weight: 600; line-height: 1; }
 
+    .bar-track { height: 8px; border-radius: 4px; background: #E8E6E0; margin-bottom: 5px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.4s ease, background-color 0.4s ease; background-color: #639922; }
+    .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: #BBBBBB; margin-bottom: 12px; }
     .bar-track { height: 8px; border-radius: 4px; background: #E8E6E0; margin-bottom: 5px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.4s ease, background-color 0.4s ease; background-color: #639922; }
     .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: #BBBBBB; margin-bottom: 12px; }
@@ -294,6 +455,17 @@
       border-radius: 0 8px 8px 0;
     }
 
+    .clinical-note {
+      font-size: 13px;
+      color: #444440;
+      line-height: 1.7;
+      background: #F7F6F2;
+      border-left: 3px solid #C8C6C0;
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .footer { text-align: center; font-size: 11px; color: #BBBBBB; padding: 8px 20px 8px; line-height: 1.6; }
     .footer { text-align: center; font-size: 11px; color: #BBBBBB; padding: 8px 20px 8px; line-height: 1.6; }
     .footer a { color: #AAAAAA; }
 
@@ -424,11 +596,13 @@
       </div>
     </div>
 
+    <!footer here if you ever want to add one>
     <p class="footer">
-      Inspired by the Tufts School of Dental Medicine diet analysis tool.<br>
+      <br>
       <a href="https://github.com/dentiite/diet-analysis-app">View on GitHub</a>
     </p>
   </div>
+
 
 
   <script>
